@@ -1,0 +1,3 @@
+# iHabit Application
+
+ * `composer install`

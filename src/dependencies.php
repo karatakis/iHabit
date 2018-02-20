@@ -17,3 +17,11 @@ $container['logger'] = function ($c) {
     $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
     return $logger;
 };
+
+// Database Abstraction Layer -- DBAL
+$container['database'] = function ($c) {
+    $settings = $c->get('settings')['database'];
+    $config = new \Doctrine\DBAL\Configuration();
+    $connection = \Doctrine\DBAL\DriverManager::getConnection($settings, $config);
+    return $connection;
+};

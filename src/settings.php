@@ -9,6 +9,9 @@ return [
             'template_path' => __DIR__ . '/../templates/',
         ],
 
+        // password hashing salt
+        'salt' => '12345-CHANGEME-12345-CHANGEME',
+
         // Monolog settings
         'logger' => [
             'name' => 'slim-app',

@@ -18,6 +18,15 @@ $container['logger'] = function ($c) {
     return $logger;
 };
 
+// Application logic injector
+$container['logic'] = function($c) {
+    // TODO optimize to load specified logic
+    return [
+        'UserLogic'  => new \App\Logic\UserLogic($c),
+        'HabitLogic' => new \App\Logic\HabitLogic($c),
+    ];
+};
+
 // Database Abstraction Layer -- DBAL
 $container['database'] = function ($c) {
     $settings = $c->get('settings')['database'];

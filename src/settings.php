@@ -12,6 +12,12 @@ return [
         // password hashing salt
         'salt' => '12345-CHANGEME-12345-CHANGEME',
 
+        'jwt' => [
+            'secret' => '214f7af41ec278ee5c0ea607f50182374c45c5c1', // jwt token secret
+            'issuer' => 'http://example.com',
+            'audience' => 'http://example.com'
+        ],
+
         // Monolog settings
         'logger' => [
             'name' => 'slim-app',

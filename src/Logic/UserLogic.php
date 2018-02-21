@@ -2,6 +2,8 @@
 namespace App\Logic;
 
 use Slim\Container;
+use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
 
 /**
  * Helper function that is used to return a uuid v4 token
@@ -53,7 +55,7 @@ class UserLogic extends AbstractLogic {
     public function login_with_username($username, $password) {
         $query = $this->connection->createQueryBuilder();
 
-        $query->from('users')->where('username = :username')->setParameter('username', $username);
+        $query->select('*')->from('users')->where('username = :username')->setParameter('username', $username);
         $users = $query->execute()->fetchAll();
 
         $this->check_users_array($users);
@@ -65,7 +67,7 @@ class UserLogic extends AbstractLogic {
     public function login_with_email($email, $password) {
         $query = $this->connection->createQueryBuilder();
 
-        $query->from('users')->where('email = :email')->setParameter('email', $email);
+        $query->select('*')->from('users')->where('email = :email')->setParameter('email', $email);
         $users = $query->execute()->fetchAll();
 
         $this->check_users_array($users);
@@ -92,9 +94,20 @@ class UserLogic extends AbstractLogic {
     }
 
     private function auth_step($user, $password) {
-        // TODO return JWT token
         if ($user['password'] === $this->hash_password($password)) {
-            return true;
+            $jwt_settings = $this->container->get('settings')['jwt'];
+            $signer = new Sha256();
+
+            $token = (new Builder())->setIssuer($jwt_settings['issuer']) // Configures the issuer (iss claim)
+                        ->setAudience($jwt_settings['audience']) // Configures the audience (aud claim)
+                        ->setIssuedAt(time()) // Configures the time that the token was issue (iat claim)
+                        ->setNotBefore(time()) // Configures the time that the token can be used (nbf claim)
+                        ->setExpiration(time() + 60 * 60 * 24 * 7) // Configures the expiration time of the token (exp claim) for one week
+                        ->set('uuid', $user['uuid']) // Configures a new claim, called "uuid"
+                        ->sign($signer, $jwt_settings['secret'])
+                        ->getToken(); // Retrieves the generated token
+
+            return $token;
         } else {
             return false;
         }

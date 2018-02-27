@@ -120,6 +120,44 @@ class HabitLogic extends AbstractLogic {
         }
     }
 
+    public function reverse(int $id, string $user_uuid) {
+        $habit = $this->read($id, $user_uuid);
+        $timestamp = new \DateTime();
+
+        if ($habit['counter'] == 0) {
+            return ['message' => 'Habit counter already at zero', 'code' => -1];
+        }
+
+        $query = $this->connection->createQueryBuilder();
+        $query
+        ->update('habits')
+        ->where('id = :id AND user_uuid = :user_uuid')
+        ->set('updated_at', ':updated_at')
+        ->setParameter('id', $id)
+        ->setParameter('user_uuid', $user_uuid)
+        ->setParameter('updated_at', $timestamp->format('Y-m-d'));
+
+        $habit['counter'] -= 1;
+
+        if ($habit['counter_value'] > $habit['counter']) {
+            $query->set('completed_today', 0);
+        }
+
+        $query->set('counter', 'counter - 1');
+
+        if(!$query->execute()) {
+            throw new LogicException('Cannot complete Habit #'. $id . "\nSomething went wrong, please try again latter.", 500);
+        }
+
+        if ($habit['counter_value'] == $habit['counter'] - 1) {
+            // habit state changed
+            return ['message' => 'Habit state changed to not complete', 'code' => 0];
+        } else {
+            // habit counter decreased
+            return ['message' => 'Habit counter decreased', 'code' => 1];
+        }
+    }
+
     /**
      * Used to update habit information
      */

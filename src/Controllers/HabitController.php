@@ -52,6 +52,16 @@ class HabitController extends AbstractController {
         return $response->withJson($habit);
     }
 
+    public function reverse(Request $request, Response $response, array $args) {
+        // TODO validate user input
+
+        $user_uuid = $request->getAttribute('user_uuid');
+
+        $habit = $this->HabitLogic->reverse($args['id'], $user_uuid);
+
+        return $response->withJson($habit);
+    }
+
     public function update(Request $request, Response $response, array $args) {
         $params = $request->getParsedBody();
         // TODO validate user input

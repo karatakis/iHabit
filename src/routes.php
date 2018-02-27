@@ -32,8 +32,8 @@ $app->group('/v1', function() use ($app) {
     $app->get('/habit/{id}', 'App\Controllers\HabitController:read');
 
     // Complete habit
-    // TODO reverse action
     $app->post('/habit/{id}', 'App\Controllers\HabitController:complete');
+    $app->put('/habit/{id}', 'App\Controllers\HabitController:reverse');
 
     // Update habit info
     $app->patch('/habit/{id}', 'App\Controllers\HabitController:update');

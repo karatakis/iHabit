@@ -8,6 +8,10 @@ use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
+/**
+ * Middleware is used to authenticate users using their JWT token
+ * TODO: Add expire date on tokens
+ */
 class AuthJWT {
 
     protected $settings;

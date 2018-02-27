@@ -3,6 +3,10 @@ namespace App\Logic;
 
 use App\Helper\LogicException;
 
+/**
+ * Contains all the logic related to Habits
+ * TODO: Seperate database repository
+ */
 class HabitLogic extends AbstractLogic {
 
     /**
@@ -120,6 +124,9 @@ class HabitLogic extends AbstractLogic {
         }
     }
 
+    /**
+     * Used to decreate the counter of Habit, reversing the action of complete
+     */
     public function reverse(int $id, string $user_uuid) {
         $habit = $this->read($id, $user_uuid);
         $timestamp = new \DateTime();
@@ -200,7 +207,7 @@ class HabitLogic extends AbstractLogic {
         }
 
         $result = $query->execute();
-        var_dump($result);
+
         if(!$result) {
             throw new LogicException('Cannot update Habit #'. $id . "\nYou have not applied any modifications to the Habit.", 400);
         }

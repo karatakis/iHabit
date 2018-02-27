@@ -1,6 +1,8 @@
 <?php
 namespace App\Middleware;
 
+use App\Helper\LogicException;
+
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\ValidationData;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
@@ -38,11 +40,7 @@ class AuthJWT {
 
         // Check if token exists
         if (empty($token)) {
-            // TODO Error generator function
-            return $response->withStatus(401)->withJson([
-                'message' => '"Authorization" http request header not found',
-                'code' => 401
-            ]);
+            throw new LogicException('"Authorization" http request header not found', 401);
         }
 
         // Load jwt settings
@@ -53,20 +51,12 @@ class AuthJWT {
 
         // Verify token signature
         if (! $this->verify_token($token, $jwt_settings)) {
-            // TODO Error generator function
-            return $response->withStatus(403)->withJson([
-                'message' => 'Invalid "Authorization" token',
-                'code' => 403
-            ]);
+            throw new LogicException('Invalid "Authorization" token', 403);
         }
 
         // Validate token
         if (! $this->validate_token($token, $jwt_settings)) {
-            // TODO Error generator function
-            return $response->withStatus(403)->withJson([
-                'message' => 'Expired "Authorization" token',
-                'code' => 403
-            ]);
+            throw new LogicException('Expired "Authorization" token', 403);
         }
 
         // Fill user_uuid attribute

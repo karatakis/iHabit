@@ -34,3 +34,5 @@ $container['database'] = function ($c) {
     $connection = \Doctrine\DBAL\DriverManager::getConnection($settings, $config);
     return $connection;
 };
+
+// TODO add Exception Handler

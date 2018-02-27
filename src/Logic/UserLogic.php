@@ -37,17 +37,17 @@ class UserLogic extends AbstractLogic {
         $query = $this->connection->createQueryBuilder();
 
         $query
-            ->insert('users')
-            ->values([
-                'username' => ':username',
-                'uuid' => ':uuid',
-                'email' => ':email',
-                'password' => ':password'
-            ])
-            ->setParameter('username', $username)
-            ->setParameter('uuid', gen_uuid())
-            ->setParameter('email', $email)
-            ->setParameter('password', $this->hash_password($password));
+        ->insert('users')
+        ->values([
+            'username' => ':username',
+            'uuid' => ':uuid',
+            'email' => ':email',
+            'password' => ':password'
+        ])
+        ->setParameter('username', $username)
+        ->setParameter('uuid', gen_uuid())
+        ->setParameter('email', $email)
+        ->setParameter('password', $this->hash_password($password));
 
         return $query->execute();
     }
@@ -83,6 +83,10 @@ class UserLogic extends AbstractLogic {
         // 2.2 Change password
     }
 
+    private function email_verify() {
+        // TODO add email verification method
+    }
+
     private function check_users_array($users) {
         $users_count = count($users);
         if ($users_count === 0) {
@@ -98,7 +102,8 @@ class UserLogic extends AbstractLogic {
             $jwt_settings = $this->container->get('settings')['jwt'];
             $signer = new Sha256();
 
-            $token = (new Builder())->setIssuer($jwt_settings['issuer']) // Configures the issuer (iss claim)
+            $token = (new Builder())
+                        ->setIssuer($jwt_settings['issuer']) // Configures the issuer (iss claim)
                         ->setAudience($jwt_settings['audience']) // Configures the audience (aud claim)
                         ->setIssuedAt(time()) // Configures the time that the token was issue (iat claim)
                         ->setNotBefore(time()) // Configures the time that the token can be used (nbf claim)

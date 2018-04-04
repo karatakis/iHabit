@@ -5,7 +5,6 @@ use App\Helper\LogicException;
 
 /**
  * Contains all the logic related to Habits
- * TODO: Seperate database repository
  */
 class HabitLogic extends AbstractLogic {
 
@@ -36,7 +35,6 @@ class HabitLogic extends AbstractLogic {
         ->insert('habits')
         ->values([
             'name' => ':name',
-            // TODO counter_value must me greater that 1
             'counter_value' => ':counter_value',
             'counter' => 0,
             'completed_today' => 0,
@@ -181,8 +179,6 @@ class HabitLogic extends AbstractLogic {
         ->setParameter('id', $id)
         ->setParameter('user_uuid', $user_uuid)
         ->setParameter('updated_at', $timestamp->format('Y-m-d'));
-
-        // TODO validate user input
 
         if (! empty($params['name'])) {
             $query->set('name', ':name');

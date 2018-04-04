@@ -3,12 +3,18 @@ namespace App\Controllers;
 
 use Slim\Http\Request;
 use Slim\Http\Response;
+use Respect\Validation\Validator;
 
 class UserController extends AbstractController {
 
     public function register(Request $request, Response $response, array $args) {
         $params = $request->getParsedBody();
-        // TODO validate user input
+
+        $paramsValidator = Validator::key('username', Validator::stringType()->length(4, 32)->noWhitespace())
+                                    ->key('email', Validator::email())
+                                    ->key('password', Validator::stringType()->length(8));
+
+        $paramsValidator->assert($params);
 
         $UserLogic = $this->container->get('logic')['UserLogic'];
 
@@ -19,7 +25,11 @@ class UserController extends AbstractController {
 
     public function login(Request $request, Response $response, array $args) {
         $params = $request->getParsedBody();
-        // TODO validate user input
+
+        $paramsValidator = Validator::key('email', Validator::email())
+                                    ->key('password', Validator::stringType()->length(8));
+
+        $paramsValidator->assert($params);
 
         $UserLogic = $this->container->get('logic')['UserLogic'];
 

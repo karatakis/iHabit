@@ -15,11 +15,11 @@ $app->get('/[{name}]', function (Request $request, Response $response, array $ar
 
 $app->post('/register', 'App\Controllers\UserController:register');
 $app->post('/login', 'App\Controllers\UserController:login');
-
-// $app->post('/change-password', 'App\Controllers\UserController:change_password');
 // $app->post('/reset-password', 'App\Controllers\UserController:reset_password');
-// $app->post('/unregister', 'App\Controllers\UserController:delete_user');
 // $app->get('/verify', 'App\Controllers\UserController:verify');
+// $app->post('/unregister', 'App\Controllers\UserController:delete_user');
+// Change user password
+$app->post('/change-password', 'App\Controllers\UserController:change_password');
 
 $app->group('/v1', function() use ($app) {
     // Get habits list

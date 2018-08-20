@@ -4,6 +4,7 @@ namespace App\Logic;
 use Slim\Container;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
+use App\Helper\LogicException;
 
 /**
  * Helper function that is used to return a uuid v4 token
@@ -31,6 +32,9 @@ function gen_uuid() {
     );
 }
 
+/**
+ * Used to contain all the database logic about User model
+ */
 class UserLogic extends AbstractLogic {
 
     public function register($username, $email, $password) {
@@ -52,53 +56,103 @@ class UserLogic extends AbstractLogic {
         return $query->execute();
     }
 
+    // TODO use function
     public function login_with_username($username, $password) {
-        $query = $this->connection->createQueryBuilder();
+        $user = $this->get_user_from_username($username);
 
-        $query->select('*')->from('users')->where('username = :username')->setParameter('username', $username);
-        $users = $query->execute()->fetchAll();
-
-        $this->check_users_array($users);
-
-        $user = $users[0];
         return $this->auth_step($user, $password);
     }
 
     public function login_with_email($email, $password) {
-        $query = $this->connection->createQueryBuilder();
+        $user = $this->get_user_from_email($email);
 
-        $query->select('*')->from('users')->where('email = :email')->setParameter('email', $email);
-        $users = $query->execute()->fetchAll();
-
-        $this->check_users_array($users);
-
-        $user = $users[0];
         return $this->auth_step($user, $password);
     }
 
-    public function change_password($email, $password, $new_password) {
-        // TODO implement logic
-        // 1. Authenticate user
-        // 2.1 Change uuid
-        // 2.2 Change password
+    private function get_user_from(string $field, $value) {
+        $query = $this->connection->createQueryBuilder();
+
+        $query->select('*')->from('users')->where($field . ' = ?')->setParameter(0, $value);
+
+        $users = $query->execute()->fetchAll();
+
+        $this->assert_users_array($users);
+
+        $user = $users[0];
+
+        return $user;
     }
 
-    private function email_verify() {
+    public function get_user_uuid($user_uuid) {
+        return $this->get_user_from('uuid', $user_uuid);
+    }
+
+    public function get_user_from_email($email) {
+        return $this->get_user_from('email', $email);
+    }
+
+    public function get_user_from_username($username) {
+        return $this->get_user_from('username', $username);
+    }
+
+    public function change_password($email, $old_password, $new_password) {
+        // Authenticate user
+        $user = $this->get_user_from_email($email);
+
+        if (!$this->authenticate($user, $old_password)) {
+            throw new LogicException('Invalid email/password combination.', 401);
+        }
+
+        // Verify that passwords are different
+        if ($old_password === $new_password) {
+            throw new LogicException('New password cannot be the same as old password!', 400);
+        }
+
+        // update password
+        $query = $this->connection->createQueryBuilder();
+
+        $query
+        ->update('users')
+        ->where('email = :email')
+        ->set('password', ':password')
+        ->setParameter('email', $email)
+        ->setParameter('password', $this->hash_password($new_password));
+
+        if(!$query->execute()) {
+            throw new LogicException('Cannot change password \nSomething went wrong, please try again latter.', 500);
+        }
+
+        // TODO Change uuid to invalidate tokens
+    }
+
+    public function email_verify() {
         // TODO add email verification method
     }
 
-    private function check_users_array($users) {
+    public function send_verification_email() {
+        // TODO
+    }
+
+    public function delete_user($email, $password) {
+
+    }
+
+    private function assert_users_array($users) {
         $users_count = count($users);
         if ($users_count === 0) {
-            throw new Exception('You are not registered.');
+            throw new LogicException('You are not registered!', 401);
         } else if ($users_count > 1) {
-            throw new Exception('Something went wrong.');
+            throw new LogicException('Something went wrong.', 500);
             // TODO add logging ERROR
         }
     }
 
+    public function authenticate($user, $password) {
+        return $user['password'] === $this->hash_password($password);
+    }
+
     private function auth_step($user, $password) {
-        if ($user['password'] === $this->hash_password($password)) {
+        if ($this->authenticate($user, $password)) {
             $jwt_settings = $this->container->get('settings')['jwt'];
             $signer = new Sha256();
 
@@ -114,7 +168,7 @@ class UserLogic extends AbstractLogic {
 
             return $token;
         } else {
-            return false;
+            throw new LogicException('Invalid email/password combination.', 401);
         }
     }
 

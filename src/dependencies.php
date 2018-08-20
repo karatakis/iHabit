@@ -22,7 +22,6 @@ $container['logger'] = function ($c) {
 $container['logic'] = function($c) {
     // TODO optimize to load specified logic
     return [
-        'UserLogic'  => new \App\Logic\UserLogic($c),
         'HabitLogic' => new \App\Logic\HabitLogic($c),
     ];
 };
